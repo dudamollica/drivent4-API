@@ -20,21 +20,36 @@ async function makeAReservation(userId: number, roomId: number) {
     throw notFoundError();
   }
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-  console.log(ticket)
+  console.log(ticket);
   if (!ticket || ticket.status === 'RESERVED' || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) {
     throw forbiddenError();
   }
   const room = await roomRepository.findById(roomId);
   if (!room) throw notFoundError();
   const reservations = await bookingRepository.findByRoomId(roomId);
-  if (room.capacity >= reservations.length) throw httpStatus.FORBIDDEN;
+  if (room.capacity <= reservations.length) throw forbiddenError();
 
   const booking = await bookingRepository.makeAReservation(userId, roomId);
   const response = { bookingId: booking.id };
   return response;
 }
 
-async function updateBoooking(userId: number, hotelId: number) {}
+async function updateBoooking(userId: number, bookingId: number, roomId: number) {
+  const userBooking = await bookingRepository.findByUserId(userId);
+  if (!userBooking) throw forbiddenError();
+
+  const booking = await bookingRepository.findById(bookingId);
+  if (!booking) throw notFoundError();
+  if (booking.id != userBooking.id) throw forbiddenError();
+
+  const room = await roomRepository.findById(roomId);
+  if (!room) throw notFoundError();
+
+  const roomBookings = await bookingRepository.findByRoomId(roomId);
+  if (room.capacity <= roomBookings.length) throw forbiddenError();
+
+  return await bookingRepository.updateRoom(bookingId, roomId)
+}
 
 export default {
   getBookings,

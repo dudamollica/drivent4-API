@@ -16,6 +16,7 @@ export async function getBookings(req: AuthenticatedRequest, res: Response, next
 export async function makeAReservation(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
   const { roomId } = req.body;
+
   try {
     const bookingId = await bookingService.makeAReservation(userId, Number(roomId));
     return res.status(httpStatus.OK).send(bookingId);
@@ -26,12 +27,12 @@ export async function makeAReservation(req: AuthenticatedRequest, res: Response,
 
 export async function updateBoooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
-  const { hotelId } = req.params;
+  const bookingId = Number(req.params.bookingId);
   const { roomId } = req.body;
 
   try {
-    const bookingId = await bookingService.updateBoooking(userId, Number(hotelId));
-    return res.status(httpStatus.OK).send(bookingId);
+    await bookingService.updateBoooking(userId, bookingId, roomId);
+    return res.status(httpStatus.OK).send({ bookingId: bookingId });
   } catch (error) {
     next(error);
   }
