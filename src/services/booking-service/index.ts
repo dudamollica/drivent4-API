@@ -1,6 +1,6 @@
 import hotelRepository from '@/repositories/hotel-repository';
 import enrollmentRepository from '@/repositories/enrollment-repository';
-import { notFoundError } from '@/errors';
+import { forbiddenError, notFoundError } from '@/errors';
 import ticketsRepository from '@/repositories/tickets-repository';
 import httpStatus from 'http-status';
 import bookingRepository from '@/repositories/booking-repository';
@@ -20,11 +20,10 @@ async function makeAReservation(userId: number, roomId: number) {
     throw notFoundError();
   }
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-
+  console.log(ticket)
   if (!ticket || ticket.status === 'RESERVED' || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) {
-    throw httpStatus.FORBIDDEN;
+    throw forbiddenError();
   }
-
   const room = await roomRepository.findById(roomId);
   if (!room) throw notFoundError();
   const reservations = await bookingRepository.findByRoomId(roomId);

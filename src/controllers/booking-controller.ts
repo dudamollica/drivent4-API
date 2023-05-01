@@ -14,7 +14,8 @@ export async function getBookings(req: AuthenticatedRequest, res: Response, next
 }
 
 export async function makeAReservation(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const { userId } = req;
+  // const { userId } = req;
+  const userId = 1879
   const { roomId } = req.body;
   try {
     const bookingId = await bookingService.makeAReservation(userId, Number(roomId));
